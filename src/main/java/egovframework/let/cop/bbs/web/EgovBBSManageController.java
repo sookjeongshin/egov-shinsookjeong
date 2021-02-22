@@ -128,7 +128,7 @@ public class EgovBBSManageController {
      * @throws Exception
      */
     @RequestMapping("/cop/bbs/selectBoardList.do")
-    public String selectBoardArticles(@ModelAttribute("searchVO") BoardVO boardVO, ModelMap model) throws Exception {
+    public String selectBoardArticles(@ModelAttribute("searchVO") BoardVO boardVO, ModelMap  model) throws Exception {
 	LoginVO user = (LoginVO)EgovUserDetailsHelper.getAuthenticatedUser();
 
 	boardVO.setBbsId(boardVO.getBbsId());

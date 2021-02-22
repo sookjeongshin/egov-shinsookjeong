@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	<!-- mybatis 설정 -->
+	<settings>
+		<!-- 전통적인 데이터베이스 컬럼(필드)명 형태인 A_COLUMN> camel표기형태> aColumn로 자동변환> get/set사용-->
+		<!-- <setting name="mapUnderscoreToCamelCase" value="ture" /> -->
+		<!-- 파라미터에 Null 값이 있을 경우 공백으로 에러처리는 Null=>'' -->
+		<setting name="jdbcTypeForNull" value="VARCHAR" />
+	</settings>
+</configuration>
