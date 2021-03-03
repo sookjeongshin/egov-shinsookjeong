@@ -39,10 +39,12 @@
        if(loginVO == null){ 
     %>
     <div id="header_loginname">
-        <a href="#" ></a>
+       <a href="<c:url value='/tiles/home.do' />">NEW전자정부사이트</a>
+    </div>
     </div>
     <div class="header_loginconnection"></div>
     <ul class="login_bg_area">
+    <li class="righttop_bgleft"></li>
         <li class="righttop_bgleft">&nbsp;</li>
         <li class="righttop_bgmiddle"><a href="<c:url value='/uat/uia/egovLoginUsr.do'/>">로그인</a></li>
         <li class="righttop_bgright">&nbsp;</li>
@@ -50,9 +52,10 @@
     <% }else { %>
     <c:set var="loginName" value="<%= loginVO.getName()%>"/>
     <div id="header_loginname">
-        <a href="#LINK" onclick="location.replace('<c:url value="/"/> admin/home.do'); return false;"><c:out value="${loginName}"/> 님</a>
+             	<a href="<c:url value='/tiles/home.do' />">NEW전자정부사이트</a>&nbsp;
+             <a href="#LINK" onclick="location.replace('<c:url value="/" />admin/home.do'); return false;"><c:out value="${loginName}"/> 님</a>
     </div>
-    <div class="header_loginconnection"> 관리자로 로그인하셨습니다.</div>
+    <div class="header_loginconnection"></div>
     <ul class="login_bg_area">
         <li class="righttop_bgleft">&nbsp;</li>
         <li class="righttop_bgmiddle"><a href="<c:url value='/uat/uia/actionLogout.do'/>">로그아웃</a></li>

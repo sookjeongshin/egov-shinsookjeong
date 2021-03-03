@@ -176,7 +176,7 @@
 					          <tr> 
 					            <th height="23">첨부파일 목록</th>
 					            <td colspan="5">
-					                <c:import url="/cmm/fms/selectFileInfs.do" charEncoding="utf-8">
+					                <c:import url="/cmm/fms/selectFileInfs.do?param_atchFileId=${result.atchFileId}" charEncoding="utf-8">
 					                    <c:param name="param_atchFileId" value="${result.atchFileId}" />
 					                </c:import>
 					            </td>

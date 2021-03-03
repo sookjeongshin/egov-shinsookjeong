@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>egov-kimilguk</groupId>
-	<artifactId>egov-kimilguk</artifactId>
+	<groupId>egov-shinsookjeong</groupId>
+	<artifactId>egov-shinsookjeong</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0</version>
-	<name>egov-kimilguk</name>
+	<name>egov-shinsookjeong</name>
 	<url>http://www.egovframe.go.kr</url>
 
 	<licenses>
@@ -252,7 +252,15 @@
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
-		</dependency>		
+		</dependency>	
+			
+		<!-- Tiles -->
+	    <dependency>
+	        <groupId>org.apache.tiles</groupId>
+	        <artifactId>tiles-extras</artifactId>
+	        <version>3.0.8</version>
+	    </dependency>
+	
 		
 	</dependencies>
 

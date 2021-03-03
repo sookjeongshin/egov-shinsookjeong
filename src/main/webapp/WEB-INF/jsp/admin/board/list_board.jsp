@@ -77,6 +77,8 @@
                     </tr>
                   </thead>
                   <tbody>
+                  <c:if test="#{fn:length(resultList)==0}"></c:if>
+                  	<tr><td class="text-center" colspan="5">조회된 값이 없습니다.</td></tr>
                   <c:forEach items="${resultList}" var="result" varStatus="status">
                     <tr>
                     <!-- 공지사항전체게시물수5 + 1-((현재페이지번호2-1)*페이지당보여줄개수10)+forEach인덱스1 -->
@@ -112,7 +114,7 @@
             
             <!-- 버튼영역 시작 -->
               <div class="card-body">
-    	<a href="<c:url value='/admin/board/insert_board.do' />" class="btn btn-primary float-right">글작성</a>        	<!-- 부트스트랩 디자인 버튼클래스를 이용해서 a태그를 버튼모양 만들기(위) -->
+    	<a href="<c:url value='/admin/board/insert_board.do?bbsId=${boardVO.bbsId}' />" class="btn btn-primary float-right">글작성</a>        	<!-- 부트스트랩 디자인 버튼클래스를 이용해서 a태그를 버튼모양 만들기(위) -->
               	<!-- btn클래스명이 버튼모양으로 변경, btn-primary클래스명은 버튼색상을 변경하는역할 -->
               	<!-- 
               	어떻게 스타일이 아닌 클래스에다가 넣어줌으로서 모양과 위치과 바뀌는건가요?
