@@ -1,9 +1,14 @@
 package edu.human.com.board.service.impl;
+
 import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
+
 import edu.human.com.board.service.BoardService;
+
 @Service
 public class BoardServiceImpl implements BoardService {
+
 	@Inject
 	private BoardDAO boardDAO;//같은 패키지안에 있으면, import가 필요 없음.
 	

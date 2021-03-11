@@ -156,7 +156,6 @@
   
 
 <%@ include file="../include/footer.jsp" %>
-<%@ include file="../include/footer.jsp" %>
 <script>
 $(document).ready(function(){
 	$(".btn_submit").on("click",function(){
