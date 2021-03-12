@@ -98,7 +98,7 @@
 $(document).ready(function(){
 	$("#btn_delete").on("click",function(){
 		alert("회원탈퇴기능은 준비중 입니다.")
-	});
+
 	});
 });
 </script>
