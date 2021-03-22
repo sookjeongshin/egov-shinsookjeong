@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,7 +26,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springmodules.validation.bean.BeanValidator;
 import org.springmodules.validation.commons.DefaultBeanValidator;
 
 import edu.human.com.board.service.BoardService;
@@ -69,6 +66,7 @@ public class HomeController {
 	private EgovFileMngUtil fileUtil;
 	@Autowired
 	private EgovFileMngService fileMngService;
+		
 	@Inject
 	private CommonUtil commUtil;
 	@Inject
@@ -76,7 +74,6 @@ public class HomeController {
 	@Inject
 	private MemberService memberService;
 	
-
 	@RequestMapping("/tiles/member/mypage_delete.do")
 	public String mypage_delete(HttpServletRequest request,EmployerInfoVO memberVO,RedirectAttributes rdat) throws Exception {
 		//회원 수정 페이지 DB처리
@@ -108,8 +105,7 @@ public class HomeController {
 	public String mypage_form(HttpServletRequest request, Model model) throws Exception {
 		//회원 보기[수정] 페이지 이동.
 		LoginVO sessionLoginVO = (LoginVO) request.getSession().getAttribute("LoginVO");
-		System.out.println("디버그 세션 그룹ID출력"+sessionLoginVO.getId());
-		EmployerInfoVO memberVO = memberService.viewMember("");
+		EmployerInfoVO memberVO = memberService.viewMember(sessionLoginVO.getId());
 		model.addAttribute("memberVO", memberVO);
 		//공통코드 로그인활성/비활성 해시맵 오브젝트 생성(아래)
 		//System.out.println("디버그:" + memberService.selectCodeMap("COM999"));
@@ -117,9 +113,10 @@ public class HomeController {
 		model.addAttribute("codeMap", memberService.selectCodeMap("COM999"));
 		//그룹이름 해시맵 오브젝트 생성(아래)
 		model.addAttribute("codeGroup", memberService.selectGroupMap());
-		
+			
 		return "member/mypage.tiles";
 	}
+	
 	@RequestMapping("/tiles/join.do")
 	public String join(EmployerInfoVO memberVO,RedirectAttributes rdat) throws Exception {
 		//입력DB처리 호출: 1.암호를 egov암호화툴로 암호, 2.ESNTL_ID 고유ID(게시판관리자ID) 생성
@@ -128,8 +125,8 @@ public class HomeController {
 		memberVO.setPASSWORD(encPassword);//egov암호화툴로 암호화된 값SET
 		memberVO.setESNTL_ID("USRCNFRM_" + memberVO.getEMPLYR_ID());//고유ID값 SET
 		memberService.insertMember(memberVO);
-		rdat.addFlashAttribute("msg", "회원가입"); 
-		return "redirect:/tiles/home.do";	
+		rdat.addFlashAttribute("msg", "회원가입");
+		return "redirect:/tiles/home.do";
 	}
 	@RequestMapping("/tiles/join_form.do")
 	public String join_form() throws Exception {
@@ -137,8 +134,10 @@ public class HomeController {
 		System.out.println("user/1234 의 암호화: " + encPassword);
 		return "join.tiles";
 	}
+	
 	@RequestMapping("/tiles/board/previewImage.do")
-	public void previewImage(HttpServletRequest request, HttpServletResponse response, @RequestParam("atchFileId") String atchFileId) throws Exception {		FileVO fileVO = new FileVO();
+	public void previewImage(HttpServletRequest request, HttpServletResponse response, @RequestParam("atchFileId") String atchFileId) throws Exception {
+		FileVO fileVO = new FileVO();
 		fileVO.setAtchFileId(atchFileId);
 		for(int cnt=0;cnt<3;cnt++) {
 			fileVO.setFileSn(Integer.toString(cnt));
@@ -161,30 +160,30 @@ public class HomeController {
 			file = new File(fileVO.getFileStreCours(),fileVO.getStreFileNm());
 		}
 		//스트리밍에 필요한 클래스 변수(오브젝트객체) 생성(아래 3가지)
-				FileInputStream fis = new FileInputStream(file);//저장된파일을 스트림클래스를 이용해서 읽어들임
-				BufferedInputStream bis = new BufferedInputStream(fis);//fis인풋스트림을 받아서 버퍼에 저장
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				int imgByte;//while반복문의 반복조건에 사용될 변수
-				while( (imgByte=bis.read()) != -1 ) {
-					baos.write(imgByte);
-				}
-				//여기까지가 출력버퍼 baos객체에 이미지내용을 임시저장한 상태
-
-				String type = "";//type변수 초기화
-				if(fileVO.getFileExtsn() !=null && !"".equals(fileVO.getFileExtsn()) ) {
-					//첨부파일 확장이름 존재하면, 이미지파일을 체크함(아래)
-					if("jpg".equals(fileVO.getFileExtsn().toLowerCase())) {
-						type = "image/jpeg";//jpg != jpeg 이름이 틀려서
-					} else {
-						type = "imge/" + fileVO.getFileExtsn().toLowerCase();
-					}
-				}
-				//브라우저에서 출력하는 response응답코드(아래)
-				response.setHeader("Content-Type", type);
-				response.setContentLength(baos.size());
-				baos.writeTo(response.getOutputStream());//실제출력전송
-				response.getOutputStream().flush();//실제화면출력됨
-				response.getOutputStream().close();//응답객체종료하기
+		FileInputStream fis = new FileInputStream(file);//저장된파일을 스트림클래스를 이용해서 읽어들임
+		BufferedInputStream bis = new BufferedInputStream(fis);//fis인풋스트림을 받아서 버퍼에 저장
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		int imgByte;//while반복문의 반복조건에 사용될 변수
+		while( (imgByte=bis.read()) != -1 ) {
+			baos.write(imgByte);
+		}
+		//여기까지가 출력버퍼 baos객체에 이미지내용을 임시저장한 상태
+		
+		String type = "";//type변수 초기화
+		if(fileVO.getFileExtsn() !=null && !"".equals(fileVO.getFileExtsn()) ) {
+			//첨부파일 확장이름 존재하면, 이미지파일을 체크함(아래)
+			if("jpg".equals(fileVO.getFileExtsn().toLowerCase())) {
+				type = "image/jpeg";//jpg != jpeg 이름이 틀려서
+			} else {
+				type = "imge/" + fileVO.getFileExtsn().toLowerCase();
+			}
+		}
+		//브라우저에서 출력하는 response응답코드(아래)
+		response.setHeader("Content-Type", type);
+		response.setContentLength(baos.size());
+		baos.writeTo(response.getOutputStream());//실제출력전송
+		response.getOutputStream().flush();//실제화면출력됨
+		response.getOutputStream().close();//응답객체종료하기
 	}
 	
 	@RequestMapping("/tiles/board/update_board.do")
@@ -250,7 +249,7 @@ public class HomeController {
 		    //게시물 업데이트 레코드 처리(아래)
 		    bbsMngService.updateBoardArticle(board);
 		}
-
+		
 	    BoardVO bdvo = new BoardVO();
 	    bdvo = bbsMngService.selectBoardArticle(boardVO);
 	    rdat.addFlashAttribute("msg", "수정");
@@ -259,7 +258,7 @@ public class HomeController {
 		+"&bbsAttrbCode="+bdvo.getBbsAttrbCode()+"&authFlag=Y"
 		+"&pageIndex="+bdvo.getPageIndex();	
 	}
-
+	
 	@RequestMapping("/tiles/board/update_board_form.do")
 	public String update_board(@ModelAttribute("searchVO") BoardVO boardVO, @ModelAttribute("board") BoardVO vo, ModelMap model)
 		    throws Exception {
@@ -302,6 +301,33 @@ public class HomeController {
 		////-----------------------------
 		return "board/update_board.tiles";
 	}
+	
+	@RequestMapping("/tiles/board/delete_board.do")
+	public String delete_board(FileVO fileVO, BoardVO boardVO, RedirectAttributes rdat) throws Exception {
+		if(boardVO.getAtchFileId()!=null && !"".equals(boardVO.getAtchFileId()) ) {
+			System.out.println("디버그:첨부파일ID "+boardVO.getAtchFileId());
+			//fileVO.setAtchFileId(boardVO.getAtchFileId());
+			//fileMngService.deleteAllFileInf(fileVO);//USE_AT='N'삭제X
+			//물리파일지우려면 2가지값 필수: file_stre_cours, stre_file_nm
+			//실제 폴더에서 파일도 삭제(아래 1개만 삭제하는 로직 -> 여러개 삭제하는 로직 변경)
+			List<FileVO> fileList = fileMngService.selectFileInfs(fileVO);
+			for(FileVO oneFileVO:fileList) {
+				FileVO delfileVO = fileMngService.selectFileInf(oneFileVO);
+				File target = new File(delfileVO.getFileStreCours(), delfileVO.getStreFileNm());
+				if(target.exists()) {
+					target.delete();//폴더에서 기존첨부파일 지우기
+					System.out.println("디버그:첨부파일삭제OK");
+				}
+			}
+			//첨부파일 레코드삭제(아래)
+			boardService.delete_attach(boardVO.getAtchFileId());//게시물에 딸린 첨부파일테이블 2개 레코드삭제
+		}
+		//게시물 레코드삭제(아래)
+		boardService.delete_board((int)boardVO.getNttId());
+		rdat.addFlashAttribute("msg", "삭제");
+		return "redirect:/tiles/board/list_board.do?bbsId="+boardVO.getBbsId();
+	}
+	
 	@RequestMapping("/tiles/board/insert_board.do")
 	public String insert_board(final MultipartHttpServletRequest multiRequest, @ModelAttribute("searchVO") BoardVO boardVO,
 		    @ModelAttribute("bdMstr") BoardMaster bdMstr, @ModelAttribute("board") Board board, BindingResult bindingResult, SessionStatus status,
@@ -316,8 +342,10 @@ public class HomeController {
 		Boolean isAuthenticated = EgovUserDetailsHelper.isAuthenticated();
 
 		beanValidator.validate(board, bindingResult);
-		if (bindingResult.hasErrors()) { //전송값이 문자인데 필드값은 날짜일때 바인딩 에러가 발생때 if문 실행
-
+		if (bindingResult.hasErrors()) {
+			//전송값이 문자인데 필드값은 날짜일때 바인딩 에러가 발생때 if문실행 Get/Set 에러
+			//전송키가 VO의 멤버변수와 같지 않아서, 전송폼 nttcn 인데 , VO의 멤버변수 nttCn 일때 바인딩 에러 
+			System.out.println("디버그" + board.toString());
 		    BoardMasterVO master = new BoardMasterVO();
 		    BoardMasterVO vo = new BoardMasterVO();
 
@@ -360,7 +388,6 @@ public class HomeController {
 
 		    bbsMngService.insertBoardArticle(board);
 		}
-	
 		return "redirect:/tiles/board/list_board.do?bbsId="+board.getBbsId();
 	}
 	
@@ -513,7 +540,7 @@ public class HomeController {
 	@RequestMapping("/logout.do")
 	public String logout(HttpServletRequest request) throws Exception {
 		RequestContextHolder.getRequestAttributes().removeAttribute("LoginVO", RequestAttributes.SCOPE_SESSION);
-		request.getSession().invalidate();
+		request.getSession().invalidate();//LoginVO세션값이 현재 URL의 모든세션 날림.
 		return "redirect:/";
 	}
 	//method.RequestMethod=GET[POST] 없이사용하면, 둘다 허용되는 매핑이됨
@@ -537,10 +564,11 @@ public class HomeController {
 		boardMap = bbsMngService.selectBoardArticles(boardVO, "BBSA02");
 		System.out.println("디버그:"+boardMap.get("resultList"));
 		model.addAttribute("galleryList", boardMap.get("resultList"));
-
+		
 		boardVO.setPageUnit(5);
 		boardVO.setBbsId("BBSMSTR_AAAAAAAAAAAA");
 		boardMap = bbsMngService.selectBoardArticles(boardVO, "BBSA02");
-		model.addAttribute("noticeList", boardMap.get("resultList"));		return "home.tiles";
+		model.addAttribute("noticeList", boardMap.get("resultList"));
+		return "home.tiles";
 	}
 }
