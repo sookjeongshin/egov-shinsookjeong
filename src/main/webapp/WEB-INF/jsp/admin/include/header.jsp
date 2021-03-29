@@ -116,6 +116,12 @@ if("${msg}!"="") {//RedirectAttributes로 컨트롤러에서 보내온 값을 �
               </p>
             </a>
             <ul class="nav nav-treeview">
+                          <li class="nav-item">
+                <a href="<c:url value='/admin/authorrole/list_author.do' />" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>권한 관리</p>
+                </a>
+              </li>
               <li class="nav-item">
                 <a href="<c:url value='/admin/member/list_member.do' />" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>

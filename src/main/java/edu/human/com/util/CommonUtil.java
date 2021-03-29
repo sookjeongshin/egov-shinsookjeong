@@ -1,3 +1,4 @@
+  
 package edu.human.com.util;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.impl.SimpleLog;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -42,25 +45,26 @@ public class CommonUtil {
 	@Autowired
 	private EgovMessageSource egovMessageSource;
 	
-	//권한/인증 체크 한 개 메서드로 처리(아래)
-	//기존 전자정부에서 List<String> 를 사용한 이유: ROLE_ADMIN, ROLE_USER 권한이 두개 이상일 수 있다
+	//private static final Logger logger = LoggerFactory.getLogger(SimpleLog.class);
+	private static Logger logger = Logger.getLogger(SimpleLog.class);
+	
+	//로그인 인증+권한 체크 1개 메서드로 처리(아래)
+	//기존전자정부에서 List<String>를 사용한 이유 ROLE_ADMIN,ROLE_USER 권한이 2개 이상일수 있습니다
 	public Boolean getAuthorities() throws Exception {
 		Boolean authority = Boolean.FALSE;
-		//인증체크(로그인상태인지 아닌지 판단)
+		//인증체크(로그인 상태인지, 아닌지 판단)
 		if (EgovObjectUtil.isNull((LoginVO) RequestContextHolder.getRequestAttributes().getAttribute("LoginVO", RequestAttributes.SCOPE_SESSION))) {
 			return authority;
 		}
-		//권한체크 (관리자인지, 일반사용자인지 판단)
+		//권한체크(관리자인지, 일반사용자인지 판단)
 		LoginVO sessionLoginVO = (LoginVO) RequestContextHolder.getRequestAttributes().getAttribute("LoginVO", RequestAttributes.SCOPE_SESSION);
 		EmployerInfoVO memberVO = memberService.viewMember(sessionLoginVO.getId());
-		if("GROUP_00000000000000".equals(memberVO.getGROUP_ID())) {
+		if( "GROUP_00000000000000".equals(memberVO.getGROUP_ID()) ) {
 			authority = Boolean.TRUE;
 		}
 		//여기까지 true값을 가져오면, 관리자라고 명시.
 		return authority;
 	}
-	
-	
 	
 	/**
 	 * 기존 로그인 처리는 egov것 그대로 사용하고,
@@ -75,38 +79,46 @@ public class CommonUtil {
 		boolean loginPolicyYn = true;
 
 		if (resultVO != null && resultVO.getId() != null && !resultVO.getId().equals("") && loginPolicyYn) {
-			//로그인 성공시
-			request.getSession().setAttribute("LoginVO", resultVO);
-			//로그인 성공후 관리자그룹일때 관리자 세션 ROLE_ADMIN명 추가
+			
+			request.getSession().setAttribute("LoginVO", resultVO);//전자정부 인증 세션발생.
+			//로그인 성공시 스프링 시큐리티 사용으로 주석처리 
+			/*
+			//로그인 성공후 관리자그룹일때 관리자 세션 ROLE_ADMIN명 권한 추가 
 			LoginVO sessionLoginVO = (LoginVO) RequestContextHolder.getRequestAttributes().getAttribute("LoginVO", RequestAttributes.SCOPE_SESSION);
 			EmployerInfoVO memberVO = memberService.viewMember(sessionLoginVO.getId());
-			if("GROUP_00000000000000".equals(memberVO.getGROUP_ID())) {
+			if( "GROUP_00000000000000".equals(memberVO.getGROUP_ID()) ) {
 				request.getSession().setAttribute("ROLE_ADMIN", memberVO.getGROUP_ID());
 			}
-			//스프링 시큐리티 인증체크 추가
+			*/
+			//*스프링 시큐리티 연동 추가 시작
 			UsernamePasswordAuthenticationFilter springSecurity = null;
-			ApplicationContext act = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
-				Map<String, UsernamePasswordAuthenticationFilter> beans = act.getBeansOfType(UsernamePasswordAuthenticationFilter.class);
-				if (beans.size() > 0) {
-					springSecurity = (UsernamePasswordAuthenticationFilter) beans.values().toArray()[0];
-					springSecurity.setUsernameParameter("egov_security_username");
-					springSecurity.setPasswordParameter("egov_security_password");
-					springSecurity.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(
-							request.getServletContext().getContextPath() + "/egov_security_login", "POST"));
-				} else {
-					throw new IllegalStateException("No AuthenticationProcessingFilter");
-				}
-				springSecurity.setContinueChainBeforeSuccessfulAuthentication(false); 
-				//false이면 chain 처리 되지 않음.. (filter가 아닌 경우 false로...)
-				springSecurity.doFilter(new RequestWrapperForSecurity(request, resultVO.getId(), resultVO.getPassword()), response, null);
-				System.out.println("context-security.xml파일의 jdbcAuthoritiesByUsernameQuery 확인");
-		    	List<String> authorities = EgovUserDetailsHelper.getAuthorities();
-		    	// 1. authorites 에  권한이 있는지 체크 TRUE/FALSE
-		    	System.out.println(authorities.contains("ROLE_ADMIN"));
-		    	System.out.println(authorities.contains("ROLE_USER"));
-		    	System.out.println(authorities.contains("ROLE_ANONYMOUS"));
-				
-				return "forward:/tiles/home.do";//변경2 NEW홈으로 이동
+			ApplicationContext act = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getSession().getServletContext());
+			Map<String,UsernamePasswordAuthenticationFilter> beans = act.getBeansOfType(UsernamePasswordAuthenticationFilter.class);
+			if (beans.size() > 0) {
+				springSecurity = (UsernamePasswordAuthenticationFilter) beans.values().toArray()[0];
+				springSecurity.setUsernameParameter("egov_security_username");
+				springSecurity.setPasswordParameter("egov_security_password");
+				springSecurity.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(
+						request.getServletContext().getContextPath() + "/egov_security_login", "POST"));
+			} else {
+				//throw new IllegalStateException("No AuthenticationProcessingFilter");
+				System.out.println("디버그 ApplicationContext에 UsernamePasswordAuthenticationFilter 클래스가 없다면");
+				return "forward:/tiles/home.do";//스프링시큐리티 설정이 없다면 이후 코딩 무시
+			}
+			springSecurity.setContinueChainBeforeSuccessfulAuthentication(false); 
+			//false이면 chain 처리 되지 않음.. (filter가 아닌 경우 false로...)
+			springSecurity.doFilter(new RequestWrapperForSecurity(request, resultVO.getId(), resultVO.getPassword()), response, null);
+			
+			System.out.println("context-security.xml파일의 jdbcAuthoritiesByUsernameQuery 확인");
+	    	List<String> authorities = EgovUserDetailsHelper.getAuthorities();
+	    	// 1. authorites 에  권한이 있는지 체크 TRUE/FALSE
+	    	logger.debug("디버그" + authorities.contains("ROLE_ADMIN"));
+	    	logger.debug("디버그" + authorities.contains("ROLE_USER"));
+	    	logger.debug("디버그" + authorities.contains("ROLE_ANONYMOUS"));
+	    	if(authorities.contains("ROLE_ADMIN")) {
+	    		request.getSession().setAttribute("ROLE_ADMIN", true);
+	    	}
+			return "forward:/tiles/home.do";//변경2 NEW홈으로 이동
 		} else {
 			//로그인 실패시
 			model.addAttribute("message", egovMessageSource.getMessage("fail.common.login"));
@@ -155,15 +167,18 @@ public class CommonUtil {
 class RequestWrapperForSecurity extends HttpServletRequestWrapper {
 	private String username = null;
 	private String password = null;
+	
 	public RequestWrapperForSecurity(HttpServletRequest request, String username, String password) {
 		super(request);
 		this.username = username;
 		this.password = password;
 	}
+
 	@Override
 	public String getRequestURI() {
 		return ((HttpServletRequest) super.getRequest()).getContextPath() + "/egov_security_login";
 	}
+
 	@Override
 	public String getServletPath() {
 		return ((HttpServletRequest) super.getRequest()).getContextPath() + "/egov_security_login";
@@ -179,6 +194,6 @@ class RequestWrapperForSecurity extends HttpServletRequestWrapper {
 		}
 		return super.getParameter(name);
 	}
+	
+	
 }
-
-
