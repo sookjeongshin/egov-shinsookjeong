@@ -50,7 +50,7 @@
                   <select class="form-control" name="AUTHOR_CODE" id="AUTHOR_CODE">
                   	<c:forEach items="${codeGroup}" var="">
                   		${sub.value.GROUP_NM}<br>
-                  		<option value="${sub.value.GROUP_NM}" <c:out value="${(result.AUTHOR_CODE==sub.value.GROUP.NM)? 'selected':''} " /> >${sub.value.GROUP.NM eq}</option>
+                  		<option value="${sub.value.group_nm}" <c:out value="${(result.AUTHOR_CODE==sub.value.group.nm)? 'selected':''} " /> >${sub.value.group.nm eq}</option>
                   	</c:forEach>
                   </select>
                   </div>
@@ -107,7 +107,7 @@
 $(document).ready(function(){
 	$("#btn_delete").on("click",function(){
 		alert("준비중 입니다.");
-		return false';
+		return false;
 		if(confirm("정말로 삭제 하시겠습니까?")) {
 			var delete_form = $("form[name='write_form']");
 			delete_form.attr("action","<c:url vlaue='/admin/authorrole/delete_author.do' />");

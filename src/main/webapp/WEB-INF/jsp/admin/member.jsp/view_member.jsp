@@ -84,7 +84,7 @@
                   <label for="EMPLYR_STTUS_CODE">EMPLYR_STTUS_CODE</label>
                 <select class="form-control" name="EMPLYR_STTUS_CODE" id="EMPLYR_STTUS_CODE">
 	                  	<c:forEach items="${codeMap}" var="sub">
-	                  		<option value="${sub.value.CODE}" <c:out value="${(memberVO.EMPLYR_STTUS_CODE==sub.value.CODE)?'selected':''}" />>${sub.value.CODE_NM}</option>
+	                  		<option value="${sub.value.code}" <c:out value="${(memberVO.EMPLYR_STTUS_CODE==sub.value.code)?'selected':''}" />>${sub.value.code_nm}</option>
 	                  	</c:forEach>
                   	</select>
                   </div>
@@ -93,7 +93,7 @@
                   <select class="form-control" name="GROUP_ID" id="GROUP_ID">
                   	<c:forEach items="${codeGroup}" var="">
                   		${sub.value.GROUP_NM}<br>
-                  		<option value="${sub.value.GROUP_ID}" <c:out value="${($memberVO.GROUP_ID==sub.value.GROUP_ID)?'selected':''}" /> >${sub.value.GROUP.NM}" </option>
+                  		<option value="${sub.value.group_id}" <c:out value="${($memberVO.GROUP_ID==sub.value.group_id)?'selected':''}" /> >${sub.value.group.nm}" </option>
                   	</c:forEach>
                   </select>
                   </div>
